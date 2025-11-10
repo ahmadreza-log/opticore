@@ -1,0 +1,54 @@
+name: Feature request
+description: Suggest an enhancement or new optimisation toggle for OptiCore.
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Share your idea for improving OptiCore. The more context you provide, the easier it is for us to assess feasibility.
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      description: A brief description of the feature.
+      placeholder: Add a toggle to defer loading of WooCommerce styles on non-shop pages.
+    validations:
+      required: true
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation / problem statement
+      description: What problem are you trying to solve? Why is this important?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe how you imagine the feature working (UI, configuration, defaults).
+      placeholder: |
+        - Add a switch in the Assets section
+        - When enabled, deregister WooCommerce styles unless on shop/cart/checkout endpoints
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: List other approaches or plugins you evaluated and why they were rejected.
+  - type: dropdown
+    id: complexity
+    attributes:
+      label: Estimated complexity
+      description: Give us a rough sense of effort or risk.
+      options:
+        - Straightforward
+        - Moderate
+        - Complex / risky
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: Attach references, links, or screenshots that support the proposal.
+

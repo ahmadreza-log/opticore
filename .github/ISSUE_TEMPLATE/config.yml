@@ -4,7 +4,8 @@ contact_links:
     url: mailto:security@opticore.dev
     about: Please report security vulnerabilities via responsible disclosure.
   - name: Documentation improvements
-    url: https://github.com/ahmadreza-log/opticore/issues/new?labels=documentation&template=feature_request.md
+    url: https://github.com/ahmadreza-log/opticore/issues/new?template=feature_request.yml&labels=documentation
     about: Suggest fixes to the project documentation.
-
-
+  - name: Community Q&A
+    url: https://github.com/ahmadreza-log/opticore/discussions/new?category=q-a
+    about: Ask general questions or get implementation advice in Discussions.

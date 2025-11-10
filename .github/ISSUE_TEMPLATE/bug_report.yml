@@ -1,0 +1,90 @@
+name: Bug report
+description: Help us fix regressions or unexpected behaviour in OptiCore.
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to help improve OptiCore! Please provide as much detail as possible so we can reproduce and diagnose the issue quickly.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: A concise description of what went wrong.
+      placeholder: e.g. Enabling "Disable Dashicons" removes frontend icons for logged-in editors.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: List each step needed to reproduce the bug.
+      placeholder: |
+        1. Go to …
+        2. Click …
+        3. Observe …
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+      description: Tell us what you expected to happen instead.
+      placeholder: The frontend icons should remain available for logged-in users.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behaviour
+      description: Describe what actually happens.
+      placeholder: Icons disappear and the admin toolbar styling breaks.
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Impact
+      description: How badly does this affect your site?
+      options:
+        - Blocks production usage
+        - High impact but workaround exists
+        - Medium impact / cosmetic
+        - Low impact / nice to fix
+    validations:
+      required: true
+  - type: input
+    id: opticore-version
+    attributes:
+      label: OptiCore version
+      description: Specify the plugin version (or commit SHA) where you observed the issue.
+      placeholder: 1.0.0
+    validations:
+      required: true
+  - type: input
+    id: wordpress-version
+    attributes:
+      label: WordPress version
+      placeholder: 6.4.2
+    validations:
+      required: true
+  - type: input
+    id: php-version
+    attributes:
+      label: PHP version
+      placeholder: 8.2.12
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment details
+      description: Include theme, notable plugins, hosting environment, browser, etc.
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / screenshots / recordings
+      description: Paste any relevant stack traces, network responses, or include screenshots.
+      placeholder: Drag and drop files here, or paste log output (wrap in code fences if possible).
+

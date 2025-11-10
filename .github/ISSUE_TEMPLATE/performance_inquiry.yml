@@ -1,0 +1,52 @@
+name: Performance inquiry
+description: Report performance metrics or request help diagnosing speed issues after configuring OptiCore.
+labels:
+  - performance
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template when you need assistance evaluating performance after enabling OptiCore optimisations.
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      description: Briefly describe the performance concern.
+      placeholder: PageSpeed score dropped after enabling "Disable Heartbeat".
+    validations:
+      required: true
+  - type: textarea
+    id: measurements
+    attributes:
+      label: Measurements
+      description: Include lab/field metrics (LCP, FID, CLS, server response, etc.) along with the tools used.
+      placeholder: |
+        - PageSpeed Insights mobile: LCP 4.1s → 5.8s
+        - GTmetrix: TTFB 320ms → 670ms
+  - type: textarea
+    id: configuration
+    attributes:
+      label: OptiCore configuration
+      description: List the toggles currently enabled and any custom values (autosave interval, heartbeat frequency, etc.).
+      placeholder: |
+        - Disable Emojis
+        - Disable REST API (Admin-only)
+        - Heartbeat Frequency: 90s
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Hosting provider, caching/CDN stack, active theme, critical plugins, server resources.
+  - type: textarea
+    id: troubleshooting
+    attributes:
+      label: Troubleshooting performed
+      description: Share any steps already taken (e.g., toggles disabled, caches purged, profiling runs).
+  - type: textarea
+    id: attachments
+    attributes:
+      label: Attachments
+      description: Upload waterfall charts, HAR files, or screenshots that highlight the degradation.
+
