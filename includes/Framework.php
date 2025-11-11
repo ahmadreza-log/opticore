@@ -234,6 +234,32 @@ class Framework
                         'description' => __('Load core block styles only when they are rendered instead of in a global stylesheet.', 'opticore'),
                         'type' => 'switcher',
                     ],
+                    [
+                        'id' => 'minify-css',
+                        'title' => __('Minify CSS', 'opticore'),
+                        'description' => __('Minify CSS files to reduce file size and improve load times.', 'opticore'),
+                        'type' => 'switcher',
+                    ],
+                    [
+                        'id' => 'exclude-css',
+                        'title' => __('Exclude CSS', 'opticore'),
+                        'description' => __('Exclude specific CSS files from minification by adding the source URL (example.css). Format: one per line.', 'opticore'),
+                        'type' => 'textarea',
+                        'placeholder' => sprintf(__('Example: %s', 'opticore'), "\nhttps://example.com/style.css\n" . trailingslashit(get_template_directory_uri()) . "style2.css"),
+                        'dependency' => ['minify-css', '==', '1'],
+                    ],
+                    [
+                        'id' => 'output-type-css',
+                        'title' => __('Output Type', 'opticore'),
+                        'description' => __('Output CSS in the head section of the HTML document.', 'opticore'),
+                        'type' => 'dropdown',
+                        'options' => [
+                            'file' => __('File', 'opticore'),
+                            'inline' => __('Inline', 'opticore'),
+                        ],
+                        'default' => 'file',
+                        'dependency' => ['minify-css', '==', '1'],
+                    ],
                 ])
             ],
             [
@@ -484,7 +510,7 @@ class Framework
             case 'textarea':
                 $textareaValue = $value ?? ($field['default'] ?? '');
 
-                echo '<textarea class="opticore-input-textarea w-80! py-2! border-2! border-zinc-300! rounded-lg! focus:border-sky-400! focus:ring-sky-400! focus:ring-0! focus:text-zinc-500! text-zinc-500!" name="opticore-setting-' . esc_attr($fieldId) . '">' . esc_textarea($textareaValue) . '</textarea>';
+                echo '<textarea class="opticore-input-textarea w-full! h-40! py-2! border-2! border-zinc-300! rounded-lg! focus:border-sky-400! focus:ring-sky-400! focus:ring-0! focus:text-zinc-500! text-zinc-500!" row="20" name="opticore-setting-' . esc_attr($fieldId) . '" placeholder="' . esc_attr($field['placeholder'] ?? '') . '">' . esc_textarea($textareaValue) . '</textarea>';
                 break;
 
             case 'text':
