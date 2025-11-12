@@ -78,8 +78,29 @@ class Ajax
 
         update_option('opticore-settings', $list);
 
+        $directory = trailingslashit(WP_CONTENT_DIR) . 'cache/opticore';
+
+        if (is_dir($directory)) {
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($directory, \FilesystemIterator::SKIP_DOTS),
+                \RecursiveIteratorIterator::CHILD_FIRST
+            );
+
+            foreach ($iterator as $item) {
+                $path = $item->getPathname();
+
+                if ($item->isDir()) {
+                    rmdir($path);
+                } else {
+                    unlink($path);
+                }
+            }
+        }
+
+        wp_mkdir_p($directory);
+
         wp_send_json_success([
-            'message' => __('Settings saved successfully!', 'opticore'),
+            'message' => __('Settings saved successfully! Cache cleared.', 'opticore'),
         ]);
     }
 }

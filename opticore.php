@@ -133,8 +133,10 @@ final class OptiCore
      */
     public function includes(): void
     {
-        $options = get_option('opticore-settings', []);
+        require_once OPTICORE_PLUGIN_DIR . 'includes/helpers/pre-print.php';
+        require_once OPTICORE_PLUGIN_DIR . 'includes/helpers/minify-css.php';
 
+        $options = get_option('opticore-settings', []);
         foreach ($options as $key => $value) {
             $file = OPTICORE_PLUGIN_DIR . 'includes/functions/' . $key . '.php';
 

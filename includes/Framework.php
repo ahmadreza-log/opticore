@@ -214,7 +214,13 @@ class Framework
                         'title' => __('Remove HTML Comments', 'opticore'),
                         'description' => __('Remove HTML comments from the HTML head.', 'opticore'),
                         'type' => 'switcher',
-                    ]
+                    ],
+                    [
+                        'id' => 'minify-html',
+                        'title' => __('Minify HTML', 'opticore'),
+                        'description' => __('Minify HTML to reduce file size and improve load times.', 'opticore'),
+                        'type' => 'switcher',
+                    ],
                 ])
             ],
             [
@@ -243,10 +249,16 @@ class Framework
                     [
                         'id' => 'exclude-css',
                         'title' => __('Exclude CSS', 'opticore'),
-                        'description' => __('Exclude specific CSS files from minification by adding the source URL (example.css). Format: one per line.', 'opticore'),
+                        'description' => __('Exclude specific CSS files from minification and combination by adding the source URL (example.css). Format: one per line.', 'opticore'),
                         'type' => 'textarea',
-                        'placeholder' => sprintf(__('Example: %s', 'opticore'), "\nhttps://example.com/style.css\n" . trailingslashit(get_template_directory_uri()) . "style2.css"),
-                        'dependency' => ['minify-css', '==', '1'],
+                        'placeholder' => sprintf(__('Example: %s', 'opticore'), "\nhttps://example.com/style.css\n" . get_stylesheet_uri()),
+                        'dependency' => [
+                            'relation' => 'OR',
+                            'conditions' => [
+                                ['field' => 'minify-css', 'operator' => '==', 'value' => '1'],
+                                ['field' => 'combine-css', 'operator' => '==', 'value' => '1'],
+                            ],
+                        ],
                     ],
                     [
                         'id' => 'output-type-css',
@@ -255,10 +267,9 @@ class Framework
                         'type' => 'dropdown',
                         'options' => [
                             'file' => __('File', 'opticore'),
-                            'inline' => __('Inline', 'opticore'),
+                            'internal' => __('Internal', 'opticore'),
                         ],
                         'default' => 'file',
-                        'dependency' => ['minify-css', '==', '1'],
                     ],
                 ])
             ],
@@ -382,34 +393,32 @@ class Framework
      */
     protected function visible(array $field): bool
     {
-        if (empty($field['dependency']) || !is_array($field['dependency'])) {
+        $config = $this->normalizeDependency($field['dependency'] ?? null);
+
+        if ($config === null) {
             return true;
         }
 
-        [$dependencyField, $operator, $expected] = array_pad($field['dependency'], 3, null);
+        $relation = $config['relation'];
+        $conditions = $config['conditions'];
 
-        if (empty($dependencyField)) {
-            return true;
+        if ($relation === 'OR') {
+            foreach ($conditions as $condition) {
+                if ($this->evaluateDependencyCondition($condition)) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
-        $currentValue = $this->value((string) $dependencyField);
-        $expectedValue = $expected;
-
-        switch ($operator) {
-            case '!=':
-            case '!==':
-                return (string) $currentValue !== (string) $expectedValue;
-            case 'in':
-                $values = (array) $expectedValue;
-                return in_array((string) $currentValue, array_map('strval', $values), true);
-            case 'not_in':
-                $values = (array) $expectedValue;
-                return !in_array((string) $currentValue, array_map('strval', $values), true);
-            case '==':
-            case '===':
-            default:
-                return (string) $currentValue === (string) $expectedValue;
+        foreach ($conditions as $condition) {
+            if (!$this->evaluateDependencyCondition($condition)) {
+                return false;
+            }
         }
+
+        return true;
     }
 
     /**
@@ -419,24 +428,37 @@ class Framework
      */
     protected function dependency(array $field): string
     {
-        if (empty($field['dependency']) || !is_array($field['dependency'])) {
+        $config = $this->normalizeDependency($field['dependency'] ?? null);
+
+        if ($config === null) {
             return '';
         }
 
-        [$dependencyField, $operator, $expected] = array_pad($field['dependency'], 3, null);
+        $encoded = wp_json_encode($config);
 
-        if (empty($dependencyField)) {
+        if ($encoded === false) {
             return '';
         }
 
-        $value = is_array($expected) ? implode(',', array_map('strval', $expected)) : (string) $expected;
-
-        return sprintf(
-            ' data-dependency-field="%s" data-dependency-operator="%s" data-dependency-value="%s"',
-            esc_attr($dependencyField),
-            esc_attr($operator ?? '=='),
-            esc_attr($value)
+        $attributes = sprintf(
+            ' data-dependency-config="%s"',
+            esc_attr($encoded)
         );
+
+        if (count($config['conditions']) === 1) {
+            $condition = $config['conditions'][0];
+            $value = $condition['value'];
+            $valueString = is_array($value) ? implode(',', array_map('strval', $value)) : (string) $value;
+
+            $attributes .= sprintf(
+                ' data-dependency-field="%s" data-dependency-operator="%s" data-dependency-value="%s"',
+                esc_attr($condition['field']),
+                esc_attr($condition['operator']),
+                esc_attr($valueString)
+            );
+        }
+
+        return $attributes;
     }
 
     /**
@@ -519,6 +541,158 @@ class Framework
 
                 echo '<input type="text" class="opticore-input-text w-80! py-2! border-2! border-zinc-300! rounded-lg! focus:border-sky-400! focus:ring-sky-400! focus:ring-0! focus:text-zinc-500! text-zinc-500!" name="opticore-setting-' . esc_attr($fieldId) . '" value="' . esc_attr($textValue) . '">';
                 break;
+        }
+    }
+
+    /**
+     * Normalise dependency definitions to a consistent structure.
+     *
+     * @param mixed $dependency
+     * @return array{relation: string, conditions: array<int, array{field: string, operator: string, value: mixed}>}|null
+     */
+    protected function normalizeDependency($dependency): ?array
+    {
+        if (empty($dependency)) {
+            return null;
+        }
+
+        $relation = 'AND';
+        $conditions = [];
+
+        if (is_array($dependency) && isset($dependency['conditions'])) {
+            $relationCandidate = strtoupper((string) ($dependency['relation'] ?? 'AND'));
+            $relation = in_array($relationCandidate, ['AND', 'OR'], true) ? $relationCandidate : 'AND';
+            $rawConditions = $dependency['conditions'];
+
+            if (!$this->isList($rawConditions)) {
+                $rawConditions = [$rawConditions];
+            }
+
+            foreach ($rawConditions as $condition) {
+                $normalized = $this->normalizeDependencyCondition($condition);
+
+                if ($normalized !== null) {
+                    $conditions[] = $normalized;
+                }
+            }
+        } elseif (is_array($dependency)) {
+            if (isset($dependency['relation'])) {
+                $relationCandidate = strtoupper((string) $dependency['relation']);
+                $relation = in_array($relationCandidate, ['AND', 'OR'], true) ? $relationCandidate : 'AND';
+                unset($dependency['relation']);
+            }
+
+            if ($this->isList($dependency) && isset($dependency[0]) && is_array($dependency[0])) {
+                foreach ($dependency as $condition) {
+                    $normalized = $this->normalizeDependencyCondition($condition);
+
+                    if ($normalized !== null) {
+                        $conditions[] = $normalized;
+                    }
+                }
+            } else {
+                $normalized = $this->normalizeDependencyCondition($dependency);
+
+                if ($normalized !== null) {
+                    $conditions[] = $normalized;
+                }
+            }
+        }
+
+        if (empty($conditions)) {
+            return null;
+        }
+
+        return [
+            'relation' => $relation,
+            'conditions' => $conditions,
+        ];
+    }
+
+    /**
+     * Standardise a single dependency condition into an associative array.
+     *
+     * @param mixed $condition
+     * @return array{field: string, operator: string, value: mixed}|null
+     */
+    protected function normalizeDependencyCondition($condition): ?array
+    {
+        if (!is_array($condition)) {
+            return null;
+        }
+
+        $field = $condition['field'] ?? ($condition['id'] ?? ($condition[0] ?? null));
+        $operator = $condition['operator'] ?? ($condition[1] ?? '==');
+        $value = $condition['value'] ?? ($condition[2] ?? '');
+
+        if ($field === null || $field === '') {
+            return null;
+        }
+
+        if (!is_string($operator) || $operator === '') {
+            $operator = '==';
+        }
+
+        return [
+            'field' => (string) $field,
+            'operator' => $operator,
+            'value' => $value,
+        ];
+    }
+
+    /**
+     * Determine if the provided array has sequential integer keys.
+     */
+    protected function isList(array $array): bool
+    {
+        return $array === [] || array_keys($array) === range(0, count($array) - 1);
+    }
+
+    /**
+     * Evaluate an individual dependency condition against stored values.
+     *
+     * @param array{field: string, operator: string, value: mixed} $condition
+     */
+    protected function evaluateDependencyCondition(array $condition): bool
+    {
+        $field = (string) ($condition['field'] ?? '');
+
+        if ($field === '') {
+            return true;
+        }
+
+        $operator = (string) ($condition['operator'] ?? '==');
+        $expected = $condition['value'] ?? '';
+        $current = $this->value($field);
+
+        $currentValues = is_array($current) ? array_map('strval', $current) : [(string) $current];
+        $expectedValues = is_array($expected) ? array_map('strval', $expected) : [(string) $expected];
+        $currentValue = $currentValues[0] ?? '';
+        $expectedValue = $expectedValues[0] ?? '';
+
+        switch ($operator) {
+            case '!=':
+            case '!==':
+                if (is_array($expected)) {
+                    return count(array_intersect($currentValues, $expectedValues)) === 0;
+                }
+
+                return $currentValue !== $expectedValue;
+
+            case 'in':
+                return count(array_intersect($currentValues, $expectedValues)) > 0;
+
+            case 'not_in':
+                return count(array_intersect($currentValues, $expectedValues)) === 0;
+
+            case '==':
+            case '===':
+            default:
+                if (is_array($expected)) {
+                    return count(array_intersect($currentValues, $expectedValues)) > 0;
+                }
+
+                return $currentValue === $expectedValue;
         }
     }
 }

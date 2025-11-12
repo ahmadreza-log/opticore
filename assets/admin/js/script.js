@@ -11,7 +11,7 @@
         Section: '.settings-menu-section',
         Form: 'form.opticore-settings-form',
         Field: (Id) => `[name="opticore-setting-${Id}"]`,
-        DependencyRow: '[data-dependency-field]',
+        DependencyRow: '[data-dependency-config], [data-dependency-field]',
     }
 
     /**
@@ -323,6 +323,7 @@
             data: FormData,
         })
             .done((Response) => {
+                console.log(Response)
                 const Message =
                     Response &&
                     Response.data &&
@@ -370,6 +371,10 @@
      * Convert a comma-delimited list into an array when dependency values allow multiple matches.
      */
     function ParseDependencyValue(Value) {
+        if (Array.isArray(Value)) {
+            return Value
+        }
+
         if (typeof Value !== 'string' || Value.indexOf(',') === -1) {
             return Value
         }
@@ -378,17 +383,147 @@
     }
 
     /**
+     * Normalise the dependency configuration stored on a row.
+     */
+    function NormalizeDependencyConfig($Row) {
+        const Cached = $Row.data('opticoreDependencyConfig')
+
+        if (Cached) {
+            return Cached
+        }
+
+        const RawConfig = $Row.data('dependencyConfig')
+
+        if (RawConfig && typeof RawConfig === 'object') {
+            const Relation =
+                typeof RawConfig.relation === 'string'
+                    ? RawConfig.relation.toUpperCase()
+                    : 'AND'
+
+            const RawConditions = Array.isArray(RawConfig.conditions)
+                ? RawConfig.conditions
+                : RawConfig.conditions
+                ? [RawConfig.conditions]
+                : []
+
+            const Conditions = RawConditions.map(NormalizeDependencyCondition).filter(
+                Boolean
+            )
+
+            if (Conditions.length) {
+                const Config = {
+                    relation: Relation === 'OR' ? 'OR' : 'AND',
+                    conditions: Conditions,
+                }
+
+                $Row.data('opticoreDependencyConfig', Config)
+                return Config
+            }
+        }
+
+        const LegacyField = $Row.data('dependency-field')
+
+        if (!LegacyField) {
+            return null
+        }
+
+        const LegacyOperator = $Row.data('dependency-operator') || '=='
+        const LegacyValue = ParseDependencyValue($Row.data('dependency-value'))
+
+        const Config = {
+            relation: 'AND',
+            conditions: [
+                NormalizeDependencyCondition([
+                    LegacyField,
+                    LegacyOperator,
+                    LegacyValue,
+                ]),
+            ],
+        }
+
+        $Row.data('opticoreDependencyConfig', Config)
+        return Config
+    }
+
+    /**
+     * Convert a raw condition (object or array) into a standard structure.
+     */
+    function NormalizeDependencyCondition(Condition) {
+        if (!Condition || typeof Condition !== 'object') {
+            return null
+        }
+
+        let Field =
+            Condition.field ??
+            Condition.id ??
+            (Array.isArray(Condition) ? Condition[0] : undefined)
+        let Operator =
+            Condition.operator ??
+            (Array.isArray(Condition) ? Condition[1] : undefined) ??
+            '=='
+        let Value =
+            Condition.value ??
+            (Array.isArray(Condition) ? Condition[2] : undefined) ??
+            ''
+
+        if (!Field) {
+            return null
+        }
+
+        if (typeof Operator !== 'string' || !Operator.length) {
+            Operator = '=='
+        }
+
+        return {
+            field: String(Field),
+            operator: Operator,
+            value: ParseDependencyValue(Value),
+        }
+    }
+
+    /**
      * Evaluate whether a dependency constraint is currently satisfied.
      */
-    function DoesDependencyMatch($Row) {
-        const FieldId = $Row.data('dependency-field')
-        const Operator = $Row.data('dependency-operator') || '=='
-        const Expected = ParseDependencyValue($Row.data('dependency-value'))
+    function DoesDependencyMatch(Config) {
+        if (!Config || !Array.isArray(Config.conditions)) {
+            return true
+        }
+
+        const Relation = Config.relation === 'OR' ? 'OR' : 'AND'
+        const Evaluations = Config.conditions.map(EvaluateDependencyCondition)
+
+        if (Relation === 'OR') {
+            return Evaluations.some(Boolean)
+        }
+
+        return Evaluations.every(Boolean)
+    }
+
+    /**
+     * Evaluate a single condition against the current field values.
+     */
+    function EvaluateDependencyCondition(Condition) {
+        const FieldId = Condition.field
+
+        if (!FieldId) {
+            return true
+        }
+
+        const Operator = Condition.operator || '=='
+        const Expected = Condition.value
         const Current = ResolveInputValue(FieldId)
+
+        const ExpectedValues = Array.isArray(Expected)
+            ? Expected.map(String)
+            : [String(Expected)]
 
         switch (Operator) {
             case '!=':
             case '!==':
+                if (Array.isArray(Expected)) {
+                    return !ExpectedValues.includes(String(Current))
+                }
+
                 return String(Current) !== String(Expected)
             case 'in': {
                 const List = Array.isArray(Expected) ? Expected : [Expected]
@@ -401,6 +536,10 @@
             case '==':
             case '===':
             default:
+                if (Array.isArray(Expected)) {
+                    return ExpectedValues.includes(String(Current))
+                }
+
                 return String(Current) === String(Expected)
         }
     }
@@ -409,11 +548,18 @@
      * Toggle dependency-blocked rows based on the controlling input field.
      */
     function RefreshDependencies(FieldId, DependencyMap, $Rows) {
-        const Rows = FieldId ? DependencyMap[FieldId] || [] : $Rows
+        const Rows = FieldId ? DependencyMap[FieldId] || [] : $Rows.get()
+        const UniqueRows = Array.from(new Set(Rows))
 
-        $(Rows).each(function () {
+        $(UniqueRows).each(function () {
             const $Row = $(this)
-            const IsVisible = DoesDependencyMatch($Row)
+            const Config = NormalizeDependencyConfig($Row)
+
+            if (!Config) {
+                return
+            }
+
+            const IsVisible = DoesDependencyMatch(Config)
 
             if (IsVisible) {
                 $Row.stop(true, true).slideDown('fast')
@@ -427,7 +573,9 @@
      * Observe dependency-triggering inputs and perform the initial pass to toggle visibility.
      */
     function InitDependencies() {
-        const $Rows = $(Selectors.DependencyRow)
+        const $Rows = $(Selectors.DependencyRow).filter(function () {
+            return NormalizeDependencyConfig($(this)) !== null
+        })
 
         if (!$Rows.length) {
             return
@@ -437,14 +585,25 @@
 
         $Rows.each(function () {
             const $Row = $(this)
-            const FieldId = $Row.data('dependency-field')
+            const Config = NormalizeDependencyConfig($Row)
 
-            if (!FieldId) {
+            if (!Config) {
                 return
             }
 
-            DependencyMap[FieldId] = DependencyMap[FieldId] || []
-            DependencyMap[FieldId].push($Row)
+            Config.conditions.forEach((Condition) => {
+                const FieldId = Condition.field
+
+                if (!FieldId) {
+                    return
+                }
+
+                DependencyMap[FieldId] = DependencyMap[FieldId] || []
+
+                if (!DependencyMap[FieldId].includes($Row[0])) {
+                    DependencyMap[FieldId].push($Row[0])
+                }
+            })
         })
 
         Object.keys(DependencyMap).forEach((FieldId) => {
