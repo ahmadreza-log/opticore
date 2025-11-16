@@ -1,12 +1,12 @@
-# Contributing to OptiCore
+# Contributing to OptiCore 🤝
 
 Welcome, and thank you for considering a contribution to OptiCore! This document outlines how to propose changes, request features, and report issues so we can maintain a predictable and friendly workflow.
 
-## Code of Conduct
+## 🧭 Code of Conduct
 
 Please review and follow the project [Code of Conduct](CODE_OF_CONDUCT.md). By participating in this repository you agree to uphold these standards.
 
-## How to Contribute
+## 💡 How to Contribute
 
 There are many ways to help:
 
@@ -15,7 +15,7 @@ There are many ways to help:
 - Improve documentation and developer experience.
 - Help reproduce outstanding issues or review pull requests.
 
-## Reporting Bugs
+## 🐛 Reporting Bugs
 
 When filing an issue:
 
@@ -29,7 +29,7 @@ When filing an issue:
 
 Security-related reports should **not** be submitted through the public issue tracker. See [SECURITY.md](SECURITY.md) for responsible disclosure instructions.
 
-## Suggesting Enhancements
+## 🚀 Suggesting Enhancements
 
 Use the feature request issue template and describe:
 
@@ -37,7 +37,7 @@ Use the feature request issue template and describe:
 - Proposed implementation details or references.
 - Any potential backwards compatibility or UX considerations.
 
-## Development Workflow
+## 🔧 Development Workflow
 
 1. Fork the repository and create a feature branch from `main`.
 2. Ensure new PHP code follows WordPress Coding Standards.
@@ -47,14 +47,23 @@ Use the feature request issue template and describe:
 6. Run linting or formatting tools relevant to your changes (PHP_CodeSniffer, etc.).
 7. Commit using clear messages and open a pull request referencing related issues.
 
-## Pull Requests
+### ✅ PR Checklist
+
+Before you hit “Create pull request”, try to ensure:
+
+- [ ] Code follows WordPress Coding Standards.
+- [ ] New/changed user-facing strings are wrapped in localisation helpers.
+- [ ] Inline comments / PHPDoc / JS docs are added or updated where useful.
+- [ ] No obvious PHP notices/warnings in your local logs.
+
+## 📦 Pull Requests
 
 - Keep changes focused; smaller PRs are easier to review.
 - Describe the motivation, approach, and testing performed.
 - Update screenshots or recordings if a UI change is involved.
 - Expect to iterate based on reviewer feedback.
 
-## Questions
+## ❓ Questions
 
 Need clarification? Open a discussion or reach out in the issue you are working on. We appreciate your help in making OptiCore better for everyone!
 
