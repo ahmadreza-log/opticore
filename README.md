@@ -2,6 +2,8 @@
 
 OptiCore is a performance-focused WordPress plugin that ships with a curated set of switches for common front-end and back-end optimizations. The plugin exposes a modern settings panel inside the admin dashboard that lets site owners toggle features without writing code, while developers can selectively load the underlying optimisation snippets on demand.
 
+The codebase is heavily documented with inline PHPDoc and JS comments to make it easy to understand how each optimisation works under the hood.
+
 ## Features
 
 - Disable heavy or unused core assets (emojis, Dashicons, embeds, jQuery Migrate, global styles, REST links, etc.).
@@ -10,6 +12,7 @@ OptiCore is a performance-focused WordPress plugin that ships with a curated set
 - Harden installations by disabling XML-RPC, blocking anonymous REST requests, and hiding version metadata.
 - Remove miscellaneous render-blocking items such as RSS feeds, self-pingbacks, and HTML comments.
 - Persist settings using the WordPress options API with a zero-configuration setup.
+- Harden direct-access surface area by shipping `index.php` stubs in all plugin directories.
 
 ## Requirements
 
@@ -38,12 +41,21 @@ All enabled settings are loaded dynamically at runtime. The plugin only requires
 - Admin UI assets live under `assets/admin`. Tailwind utility classes are inlined via `tailwindcss-4.1.16.js`.
 - Settings sections and field metadata are defined in `includes/Framework.php`. Rendering logic automatically honours field dependencies.
 - JavaScript that drives the settings screen (menu navigation, AJAX, dependency toggling) is located at `assets/admin/js/script.js`.
+- Each optimisation snippet under `includes/functions/` is self-contained and documented, making it easy to audit or extend.
 
 When contributing code:
 
 1. Ensure PHP files follow WordPress coding standards.
 2. Provide internationalisation (i18n) wrapping for user-facing strings.
 3. Add feature flags through the framework so they can be toggled safely.
+4. Keep inline comments and PHPDoc blocks up to date with behaviour changes.
+5. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the full contribution guide.
+
+## Security
+
+- All optimisation code is loaded conditionally based on saved settings to keep the runtime surface small.
+- Directory browsing is mitigated by `index.php` guards in all plugin subdirectories.
+- For vulnerability reports, please follow the process in [`SECURITY.md`](SECURITY.md).
 
 ## Testing
 

@@ -20,6 +20,16 @@ Please report suspected vulnerabilities privately. Email `security@opticore.dev`
 
 We aim to acknowledge reports within **3 business days** and provide a status update at least every **7 days** until the issue is resolved.
 
+## Defence in Depth
+
+In addition to fixing vulnerabilities as they are reported, OptiCore follows some basic hardening practices:
+
+- Conditional loading of optimisation snippets based on saved settings.
+- Avoiding direct script access where possible and adding `index.php` guards in all plugin directories.
+- Keeping internal helper functions small and well-documented to simplify audits.
+
+These measures are not a replacement for proper server hardening or a Web Application Firewall, but they help reduce accidental exposure.
+
 ## Disclosure Process
 
 1. We will investigate, confirm the issue, and work on a fix.

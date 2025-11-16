@@ -1,8 +1,12 @@
 <?php
 
 /**
- * Admin-specific functionality
- * Handles admin menu, settings, and scripts
+ * Admin-specific functionality for OptiCore.
+ *
+ * This class is responsible for wiring the plugin into the WordPress admin area:
+ * - registering the top-level "OptiCore" menu and its subpages (Dashboard / Settings),
+ * - registering the settings group that persists the options array, and
+ * - exposing shortcut links on the Plugins screen for quick navigation. ✨
  *
  * @package OptiCore
  */
@@ -30,7 +34,7 @@ class Admin
     private static ?self $instance = null;
 
     /**
-     * Retrieve the singleton instance.
+     * Retrieve the singleton instance used to manage admin hooks.
      *
      * @return self
      */
@@ -45,6 +49,9 @@ class Admin
 
     /**
      * Register admin-specific hooks.
+     *
+     * The constructor is invoked only once via {@see self::instance()}. It attaches the
+     * admin menu, settings registration, and plugin action links to the appropriate hooks.
      */
     public function __construct()
     {
@@ -73,6 +80,14 @@ class Admin
 
     /**
      * Register the main menu page and auxiliary subpages.
+     *
+     * This method wires the plugin into the WordPress admin menu:
+     * - top-level "OptiCore" entry (acts as the main container),
+     * - "Dashboard" view (slug: `opticore-dashboard`),
+     * - "Settings" view (slug: `opticore-settings`).
+     *
+     * @see https://developer.wordpress.org/reference/functions/add_menu_page/
+     * @see https://developer.wordpress.org/reference/functions/add_submenu_page/
      *
      * @return void
      */
@@ -107,6 +122,7 @@ class Admin
         );
 
         // Hide the redundant "OptiCore" submenu entry that WP adds automatically.
+        // This keeps the sidebar tidy and avoids a duplicate link that points to the same screen.
         remove_submenu_page('opticore', 'opticore');
     }
 

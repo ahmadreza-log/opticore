@@ -1,8 +1,14 @@
 <?php
 
 /**
- * Admin-specific functionality
- * Handles admin menu, settings, and scripts
+ * AJAX controller for OptiCore admin actions.
+ *
+ * Currently this class exposes a single endpoint used to persist the settings form. The
+ * endpoint:
+ * - validates the nonce,
+ * - normalises and sanitises the incoming fields,
+ * - updates the `opticore-settings` option, and
+ * - clears the OptiCore cache directory before responding with JSON. 🚀
  *
  * @package OptiCore
  */
@@ -24,6 +30,8 @@ class Ajax
 
     /**
      * Retrieve (or lazily create) the singleton instance.
+     *
+     * @return self
      */
     public static function instance(): self
     {
@@ -36,6 +44,9 @@ class Ajax
 
     /**
      * Register AJAX endpoints.
+     *
+     * The constructor registers the `opticore-save-settings` action used by the admin
+     * settings screen to persist option changes over `admin-ajax.php`.
      */
     public function __construct()
     {
@@ -59,6 +70,19 @@ class Ajax
 
     /**
      * Persist settings submitted from the admin screen.
+     *
+     * The settings form posts data via `$.serialize()` which currently uses the GET method
+     * for compatibility. All values are sanitised and then stored as a single options array
+     * under the `opticore-settings` key.
+     *
+     * On success, the OptiCore cache directory is cleared so regenerated assets (like
+     * minified CSS) can be rebuilt on the next request.
+     *
+     * @see https://developer.wordpress.org/reference/functions/check_ajax_referer/
+     * @see https://developer.wordpress.org/reference/functions/update_option/
+     * @see https://developer.wordpress.org/reference/functions/wp_send_json_success/
+     *
+     * @return void
      */
     public function save_settings(): void
     {

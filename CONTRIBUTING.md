@@ -42,9 +42,10 @@ Use the feature request issue template and describe:
 1. Fork the repository and create a feature branch from `main`.
 2. Ensure new PHP code follows WordPress Coding Standards.
 3. Wrap user-facing strings in the appropriate localisation function (e.g., `__()`, `_e()`).
-4. Add or update documentation and tests where applicable.
-5. Run linting or formatting tools relevant to your changes (PHP_CodeSniffer, etc.).
-6. Commit using clear messages and open a pull request referencing related issues.
+4. Keep or improve inline documentation (PHPDoc and JS comments) so the codebase remains easy to read.
+5. Add or update documentation and tests where applicable.
+6. Run linting or formatting tools relevant to your changes (PHP_CodeSniffer, etc.).
+7. Commit using clear messages and open a pull request referencing related issues.
 
 ## Pull Requests
 

@@ -4,6 +4,11 @@ namespace Opticore;
 
 /**
  * Handles asset loading for the plugin across admin, login, and front-end contexts.
+ *
+ * This class centralises all WordPress enqueue logic so that:
+ * - admin assets for the OptiCore UI are loaded only on relevant pages,
+ * - future front-end/login assets can be registered in a single place, and
+ * - localisation data (AJAX URL, nonce, etc.) is exposed to the admin script. 🎨
  */
 class Enqueue
 {
@@ -16,6 +21,8 @@ class Enqueue
 
     /**
      * Return (and lazily create) the enqueue singleton.
+     *
+     * @return self
      */
     public static function instance(): self
     {
@@ -28,6 +35,11 @@ class Enqueue
 
     /**
      * Register WordPress hooks for loading assets.
+     *
+     * The constructor is called once via {@see self::instance()} and:
+     * - conditionally hooks `admin_enqueue_scripts` when viewing OptiCore pages,
+     * - always hooks `wp_enqueue_scripts` and `login_enqueue_scripts` as placeholders
+     *   for future front-end/login assets.
      */
     public function __construct()
     {
@@ -58,6 +70,9 @@ class Enqueue
 
     /**
      * Placeholder for front-end assets. Intentionally empty until required.
+     *
+     * When OptiCore starts shipping front-end resources (e.g. helper widgets or
+     * UI components), they should be enqueued from here.
      */
     public function frontend(): void
     {
@@ -66,6 +81,9 @@ class Enqueue
 
     /**
      * Placeholder for login screen assets. Intentionally empty until required.
+     *
+     * This is reserved for any future enhancements that target the WordPress login
+     * screen specifically.
      */
     public function login(): void
     {
@@ -74,6 +92,20 @@ class Enqueue
 
     /**
      * Enqueue admin assets needed for the OptiCore settings experience.
+     *
+     * Includes:
+     * - icon font + Google fonts,
+     * - Tailwind runtime used for utility classes,
+     * - main admin stylesheet and behaviour script.
+     *
+     * The script is localised with the `admin-ajax.php` URL and a nonce so that
+     * the settings form can be submitted securely via AJAX. ⚙️
+     *
+     * @see https://developer.wordpress.org/reference/functions/wp_enqueue_style/
+     * @see https://developer.wordpress.org/reference/functions/wp_enqueue_script/
+     * @see https://developer.wordpress.org/reference/functions/wp_localize_script/
+     *
+     * @return void
      */
     public function admin(): void
     {

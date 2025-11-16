@@ -1,3 +1,15 @@
+/**
+ * OptiCore admin behaviour script.
+ *
+ * This file enhances the PHP-rendered settings screen with:
+ * - left-hand section navigation (with hash + localStorage persistence),
+ * - an AJAX-powered settings form (with a loading state for the submit button),
+ * - a lightweight toast notification system, and
+ * - dynamic show/hide behaviour for fields with dependencies. ⚡
+ *
+ * All logic is wrapped in an IIFE that receives `jQuery` to avoid polluting the
+ * global scope while still using the familiar `$` shorthand.
+ */
 ;(function ($) {
     'use strict'
 

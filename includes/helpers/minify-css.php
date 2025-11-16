@@ -1,10 +1,23 @@
 <?php
 
+/**
+ * Helper: compact a CSS string by removing comments and unnecessary whitespace.
+ *
+ * This function is intentionally conservative: it keeps comments intact and
+ * avoids touching content inside functions such as `calc()` beyond safe whitespace
+ * removal. It is used by OptiCore's CSS optimisation feature. 🎯
+ */
 if (!function_exists('opticore_minify_css')) {
+    /**
+     * Perform a series of regex-based transformations to shrink CSS content.
+     *
+     * @param string $css Raw stylesheet contents.
+     * @return string|null Minified CSS or null when input is not valid.
+     */
     function opticore_minify_css($css)
     {
         if (!is_string($css) || $css === '') {
-            return;
+            return null;
         }
 
         // Normalize line endings and trim once.
