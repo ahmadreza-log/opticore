@@ -22,6 +22,7 @@
         MenuItem: '.settings-menu-item',
         Section: '.settings-menu-section',
         Form: 'form.opticore-settings-form',
+        PagespeedApiKeyForm: 'form.pagespeed-api-key',
         Field: (Id) => `[name="opticore-setting-${Id}"]`,
         DependencyRow: '[data-dependency-config], [data-dependency-field]',
     }
@@ -358,6 +359,7 @@
      */
     function InitForm() {
         $(Selectors.Form).on('submit', HandleFormSubmit)
+        $(Selectors.PagespeedApiKeyForm).on('submit', HandleFormSubmit)
     }
 
     /**
