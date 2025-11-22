@@ -117,6 +117,7 @@ class Enqueue
 
         // JS
         wp_enqueue_script('opticore-tailwind', OPTICORE_PLUGIN_URL . 'assets/admin/js/tailwindcss-4.1.16.js', [], '4.1.16', false);
+        wp_enqueue_script('opticore-popper', OPTICORE_PLUGIN_URL . 'assets/admin/js/popper.min.js', [], '2.11.8', true);
         wp_enqueue_script('opticore-script', OPTICORE_PLUGIN_URL . 'assets/admin/js/script.js', ['jquery'], OPTICORE_PLUGIN_VERSION, true);
 
         wp_localize_script('opticore-script', 'opticore', [

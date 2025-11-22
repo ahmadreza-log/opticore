@@ -10,7 +10,7 @@
  * All logic is wrapped in an IIFE that receives `jQuery` to avoid polluting the
  * global scope while still using the familiar `$` shorthand.
  */
-;(function ($) {
+; (function ($) {
     'use strict'
 
     /**
@@ -339,8 +339,8 @@
                 console.log(Response)
                 const Message =
                     Response &&
-                    Response.data &&
-                    Response.data.message
+                        Response.data &&
+                        Response.data.message
                         ? Response.data.message
                         : Messages.Saved
 
@@ -417,8 +417,8 @@
             const RawConditions = Array.isArray(RawConfig.conditions)
                 ? RawConfig.conditions
                 : RawConfig.conditions
-                ? [RawConfig.conditions]
-                : []
+                    ? [RawConfig.conditions]
+                    : []
 
             const Conditions = RawConditions.map(NormalizeDependencyCondition).filter(
                 Boolean
@@ -637,6 +637,45 @@
         RefreshDependencies(undefined, DependencyMap, $Rows)
     }
 
+    function InitTooltip() {
+        $('[data-tooltip]').each(function () {
+            const selector = $(this)
+            const text = selector.data('tooltip')
+
+            let options = selector.data()
+            delete options['tooltip']
+
+            let id = 'tooltip-' + Math.random().toString(36).substring(2, 15)
+
+            selector.attr('data-tooltip-id', id)
+            selector.hover(function () {
+                $('body').append(`<div class="tooltip" id="${id}" data-show="true">${text}<div id="${id}-arrow" class="tooltip-arrow" data-popper-arrow></div></div>`)
+                Popper.createPopper(document.querySelector(`[data-tooltip-id="${id}" ]`), document.querySelector(`#${id}`), {
+                    placement: options.placement || 'top',
+                    strategy: options.strategy || 'fixed',
+                    modifiers: options.modifiers || [
+                        {
+                            name: 'preventOverflow',
+                            options: {
+                                altBoundary: true,
+                                padding: 8,
+                            }
+                        }, {
+                            name: 'offset',
+                            options: {
+                                offset: [0, 8],
+                            },
+                        },
+                    ]
+                })
+            }, function () {
+                $(`#${id}`).remove()
+            })
+
+
+        })
+    }
+
     /**
      * Entry point executed on document ready.
      */
@@ -646,6 +685,7 @@
         RestoreInitialSection()
         InitForm()
         InitDependencies()
+        InitTooltip()
     }
 
     $(Initialize)

@@ -2,3 +2,59 @@
     font-family: "Poppins", sans-serif;
     font-style: normal;
 }
+
+.tooltip {
+    background: #333;
+    color: white;
+    font-weight: bold;
+    padding: 4px 8px;
+    font-size: 13px;
+    border-radius: 4px;
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(-10px);
+    -webkit-transition: opacity 0.2s ease-in-out;
+    -moz-transition: opacity 0.2s ease-in-out;
+    -ms-transition: opacity 0.2s ease-in-out;
+    -o-transition: opacity 0.2s ease-in-out;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.tooltip[data-show] {
+    visibility: visible;
+    opacity: 1;
+}
+
+.tooltip-arrow,
+.tooltip-arrow::before {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: inherit;
+}
+
+.tooltip-arrow {
+    visibility: hidden;
+}
+
+.tooltip-arrow::before {
+    visibility: visible;
+    content: '';
+    transform: rotate(45deg);
+}
+
+.tooltip[data-popper-placement^='top']>.tooltip-arrow {
+    bottom: -4px;
+}
+
+.tooltip[data-popper-placement^='bottom']>.tooltip-arrow {
+    top: -4px;
+}
+
+.tooltip[data-popper-placement^='left']>.tooltip-arrow {
+    right: -4px;
+}
+
+.tooltip[data-popper-placement^='right']>.tooltip-arrow {
+    left: -4px;
+}

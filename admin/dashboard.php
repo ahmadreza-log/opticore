@@ -36,11 +36,14 @@
                 <form class="pagespeed-api-key flex gap-2 items-center" method="post">
                     <label class="relative">
                         <input type="text" name="pagespeed-api-key" class="w-150! py-3! border-2! border-zinc-300! rounded-full! focus:border-sky-400! focus:ring-sky-400! focus:ring-0! focus:text-zinc-500! text-zinc-500!" placeholder="<?php _e('Enter your PageSpeed API key', 'opticore'); ?>">
-                        <button type="button" class="absolute right-30 top-1/2 -translate-y-1/2 bg-slate-100">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 32 32" class="group-hover:animate-spin" aria-hidden="true">
-                                <path fill="currentColor" d="M16 4c-5.113 0-9.383 3.16-11.125 7.625l1.844.75C8.176 8.641 11.71 6 16 6c3.242 0 6.133 1.59 7.938 4H20v2h7V5h-2v3.094A11.94 11.94 0 0 0 16 4m9.281 15.625C23.824 23.359 20.29 26 16 26c-3.277 0-6.156-1.613-7.969-4H12v-2H5v7h2v-3.094C9.188 26.386 12.395 28 16 28c5.113 0 9.383-3.16 11.125-7.625z" />
+                        <div class="absolute right-30 top-1/2 -translate-y-1/2" data-tooltip="<?php printf("<div class='flex flex-col'><h2 class='!my-0 text-white'>%s</h2><div>%s</div><a href='https://developers.google.com/speed/docs/insights/rest' target='_blank'>%s</a></div>", __('API Key', 'opticore'), __('Enter your PageSpeed API key', 'opticore'), __('Learn more', 'opticore'));?>">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5">
+                                    <path d="M12 17v-5h-.5m0 5h1M12 9.5V9" />
+                                    <path d="M5.98 10.761C8.608 5.587 9.92 3 12 3c2.08 0 3.393 2.587 6.02 7.761l.327.645c2.182 4.3 3.274 6.45 2.287 8.022C19.648 21 17.208 21 12.327 21h-.654c-4.88 0-7.321 0-8.307-1.572c-.987-1.572.105-3.722 2.287-8.022z" />
+                                </g>
                             </svg>
-                        </button>
+                        </div>
                         <button type="submit" class="shadow-lg flex gap-2 py-2 px-4 bg-sky-400 items-center text-white font-bold! rounded-full cursor-pointer group absolute right-2 top-1/2 -translate-y-1/2">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 32 32" class="group-hover:animate-bounce" aria-hidden="true">
                                 <path fill="currentColor" d="M5 5v22h22V9.594l-.281-.313l-4-4L22.406 5zm2 2h3v6h12V7.437l3 3V25h-2v-9H9v9H7zm5 0h4v2h2V7h2v4h-8zm-1 11h10v7H11z" />
